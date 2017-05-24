@@ -2,10 +2,12 @@ package com.personal.demo.controller;
 
 import com.personal.demo.domain.dto.UserDto;
 import com.personal.demo.domain.model.User;
+import com.personal.demo.event.OnRegistrationCompleteEvent;
 import com.personal.demo.exception.EmailExistsException;
 import com.personal.demo.service.UserService;
 import com.personal.demo.service.UserServiceImpl;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
@@ -27,6 +29,9 @@ public class UserController {
     @Autowired
     private UserService userService;
 
+    @Autowired
+    private ApplicationEventPublisher eventPublisher;
+
     @RequestMapping(value = "/user/registration", method = RequestMethod.GET)
     public String showRegistrationForm(WebRequest request, Model model){
         UserDto userDto = new UserDto();
@@ -35,20 +40,29 @@ public class UserController {
     }
 
     @RequestMapping(value = "/user/registration", method = RequestMethod.POST)
-    public ModelAndView registerUserAccount(@ModelAttribute("user") @Valid UserDto accountDto, BindingResult result, WebRequest request, Errors errors){
-        User registered = new User();
+    public ModelAndView registerUserAccount(
+            @ModelAttribute("user") @Valid UserDto accountDto,
+            BindingResult result,
+            WebRequest request,
+            Errors errors){
+
         if(!result.hasErrors()){
-            registered = createUserAccount(accountDto, result);
+            return new ModelAndView("registration", "user", accountDto);
         }
+
+        User registered = createUserAccount(accountDto, result);
         if(registered == null){
             result.rejectValue("email", "message.regError");
         }
-        if(result.hasErrors()){
-            return new ModelAndView("registration", "user", accountDto);
+
+        try{
+            String appUrl = request.getContextPath();
+            eventPublisher.publishEvent(new OnRegistrationCompleteEvent(registered, request.getLocale(), appUrl));
+        }catch (Exception me){
+            return new ModelAndView("emailError", "user", accountDto);
         }
-        else{
-            return new ModelAndView("successRegister", "user", accountDto);
-        }
+        return new ModelAndView("successRegister", "user", accountDto);
+
     }
 
     private User createUserAccount(UserDto accountDto, BindingResult result){

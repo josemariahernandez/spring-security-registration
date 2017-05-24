@@ -23,10 +23,17 @@ public class User {
 
     @Column(length = 60)
     private String password;
+
+    @Column(name = "enabled")
     private boolean enabled;
     private String secret;
 
     @ManyToMany(fetch = FetchType.EAGER)
     @JoinTable(name = "users_roles", joinColumns = @JoinColumn(name = "user_id", referencedColumnName = "id"), inverseJoinColumns = @JoinColumn(name = "role_id", referencedColumnName = "id"))
     private Collection<Role> roles;
+
+    public User(){
+        super();
+        this.enabled = false;
+    }
 }

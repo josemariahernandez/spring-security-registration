@@ -3,9 +3,12 @@ package com.personal.demo.service;
 import com.personal.demo.domain.dto.UserDto;
 import com.personal.demo.domain.model.Role;
 import com.personal.demo.domain.model.User;
+import com.personal.demo.domain.model.VerificationToken;
 import com.personal.demo.exception.EmailExistsException;
 import com.personal.demo.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -36,6 +39,24 @@ public class UserServiceImpl implements UserService {
         uerRole.setName("ROLE_USER");
         user.setRoles(Arrays.asList(uerRole));
         return repository.save(user);
+    }
+
+    //TODO Implementar este metodo. Solo esta puesto para que no de errores
+    @Override
+    public void createVerificationToken(User user, String token) {
+
+    }
+
+    //TODO Implementar este metodo. Solo esta puesto para que no de errores
+    @Override
+    public VerificationToken getVerificationToken(String token) {
+        return null;
+    }
+
+    //TODO Implementar este metodo. Solo esta puesto para que no de errores
+    @Override
+    public void saveRegisteredUser(User user) {
+
     }
 
     private boolean emailExist(String email){
